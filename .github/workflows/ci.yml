@@ -32,28 +32,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
-      - name: Run tests (py${{ matrix.python-version }}-flask${{ matrix.flask }}) and ensure coverage file
+      - name: Run tests (py${{ matrix.python-version }}-flask${{ matrix.flask }}) and save coverage
         shell: bash
         run: |
           set -euxo pipefail
           ENV_NAME="py$(echo '${{ matrix.python-version }}' | tr -d .)-flask${{ matrix.flask }}"
           tox -e "$ENV_NAME"
-
-          echo "After tox, searching for coverage data files..."
-          find . -maxdepth 4 -type f -name ".coverage*" -print || true
-
-          TARGET=".coverage.${{ matrix.python-version }}-flask${{ matrix.flask }}"
-          if [ -f ".coverage" ]; then
-            mv .coverage "$TARGET"
-          else
-            CAND=$(find . -type f -name ".coverage*" | head -n 1 || true)
-            if [ -z "$CAND" ]; then
-              echo "No coverage data file produced"; exit 1
-            fi
-            cp "$CAND" "$TARGET"
-          fi
-
-          ls -la "$TARGET"
+          mv .coverage ".coverage.${{ matrix.python-version }}-flask${{ matrix.flask }}"
+          ls -la ".coverage.${{ matrix.python-version }}-flask${{ matrix.flask }}"
 
       - name: Upload .coverage artifact
         uses: actions/upload-artifact@v4
