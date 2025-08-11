@@ -1,0 +1,30 @@
+# Dockerfile.test
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-slim
+
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+COPY . .
+
+RUN python -m pip install --upgrade pip && pip install tox
+
+ENV TOX_ENVS=
+CMD bash -lc '\
+  if [ -z "$TOX_ENVS" ]; then \
+    V=py$(python -c "import sys;print(f\"{sys.version_info.major}{sys.version_info.minor}\")"); \
+    echo \"Running tox for: $V\"; \
+    tox -e "$V"; \
+  else \
+    if [ "${TOX_ENVS#-}" != "$TOX_ENVS" ]; then \
+      V=py$(python -c "import sys;print(f\"{sys.version_info.major}{sys.version_info.minor}\")")"$TOX_ENVS"; \
+      echo \"Running tox for: $V\"; \
+      tox -e "$V"; \
+    else \
+      echo \"Running tox for: $TOX_ENVS\"; \
+      tox -e "$TOX_ENVS"; \
+    fi; \
+  fi'
+
