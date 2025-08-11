@@ -106,7 +106,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload to Codecov
-        if: ${{ always() && (github.ref != 'refs/heads/main' || secrets.CODECOV_TOKEN) }}
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
